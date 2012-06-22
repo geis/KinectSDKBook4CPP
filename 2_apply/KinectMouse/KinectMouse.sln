@@ -1,0 +1,20 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual C++ Express 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "KinectMouse", "KinectMouse.vcxproj", "{F0D52813-3D2A-4311-8B42-910A2D550734}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F0D52813-3D2A-4311-8B42-910A2D550734}.Debug|Win32.ActiveCfg = Debug|Win32
+		{F0D52813-3D2A-4311-8B42-910A2D550734}.Debug|Win32.Build.0 = Debug|Win32
+		{F0D52813-3D2A-4311-8B42-910A2D550734}.Release|Win32.ActiveCfg = Release|Win32
+		{F0D52813-3D2A-4311-8B42-910A2D550734}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
