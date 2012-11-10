@@ -36,8 +36,8 @@ void KinectControl::initialize()
   // Nearモードでのスケルトントラッキングおよび、Seatedモードにする
   ERROR_CHECK( kinect->NuiSkeletonTrackingEnable( 0, 
     NUI_SKELETON_TRACKING_FLAG_SUPPRESS_NO_FRAME_DATA |
-	NUI_SKELETON_TRACKING_FLAG_ENABLE_IN_NEAR_RANGE | 
-	NUI_SKELETON_TRACKING_FLAG_ENABLE_SEATED_SUPPORT ) );
+	  NUI_SKELETON_TRACKING_FLAG_ENABLE_IN_NEAR_RANGE | 
+	  NUI_SKELETON_TRACKING_FLAG_ENABLE_SEATED_SUPPORT ) );
   //ERROR_CHECK( kinect->NuiSkeletonTrackingEnable( 0, NUI_SKELETON_TRACKING_FLAG_SUPPRESS_NO_FRAME_DATA ) );
 
   // フレーム更新イベントのハンドルを作成する
@@ -142,26 +142,34 @@ void KinectControl::setDepthImage( cv::Mat& image )
 
 void KinectControl::setSkeleton( cv::Mat& image )
 { 
-  // スケルトンのフレームを取得する
-  NUI_SKELETON_FRAME skeletonFrame = { 0 };
-  HRESULT ret = kinect->NuiSkeletonGetNextFrame( 0, &skeletonFrame );
+  try { 
+    // スケルトンのフレームを取得する
+    NUI_SKELETON_FRAME skeletonFrame = { 0 };
+    HRESULT ret = kinect->NuiSkeletonGetNextFrame( 0, &skeletonFrame );
 
-  if( ret == S_OK ) {
-    for ( int i = 0; i < NUI_SKELETON_COUNT; ++i ) {
-      NUI_SKELETON_DATA& skeletonData = skeletonFrame.SkeletonData[i];
-      if ( skeletonData.eTrackingState == NUI_SKELETON_TRACKED ) {
+    if( ret == S_OK ) {
+      for ( int i = 0; i < NUI_SKELETON_COUNT; ++i ) {
+        NUI_SKELETON_DATA& skeletonData = skeletonFrame.SkeletonData[i];
+        if ( skeletonData.eTrackingState == NUI_SKELETON_TRACKED ) {
 
-        // 各ジョイントごとに
-        for ( int j = 0; j < NUI_SKELETON_POSITION_COUNT; ++j ) {
-          if ( skeletonData.eSkeletonPositionTrackingState[j] != NUI_SKELETON_POSITION_NOT_TRACKED ) {
-            setJoint( image, j, skeletonData.SkeletonPositions[j] );
+          // 各ジョイントごとに
+          for ( int j = 0; j < NUI_SKELETON_POSITION_COUNT; ++j ) {
+            if ( skeletonData.eSkeletonPositionTrackingState[j] != NUI_SKELETON_POSITION_NOT_TRACKED ) {
+              setJoint( image, j, skeletonData.SkeletonPositions[j] );
+            }
           }
         }
-      }
-      else if ( skeletonData.eTrackingState == NUI_SKELETON_POSITION_ONLY ) {
-        setJoint( image, -1, skeletonData.Position );
+        else if ( skeletonData.eTrackingState == NUI_SKELETON_POSITION_ONLY ) {
+          setJoint( image, -1, skeletonData.Position );
+        }
       }
     }
+  }
+  catch ( std::exception& ex ) {
+    std::cout << ex.what() << std::endl;
+  }
+  catch ( ... ) {
+    std::cout << "unknown exception" << std::endl;
   }
 }
 
@@ -299,12 +307,27 @@ void KinectControl::setHandImage( Vector4 handPos, Vector4 wristPos, cv::Mat &im
 
         // step個前の輪郭点までの距離
         int before = i - step;
-        if( before < 0 ) before = cgDists.size() + ( i - step );
+        if( before < 0 ) {
+          before = cgDists.size() + ( i - step );
+          if ( before >= cgDists.size() ) {
+            before = cgDists.size() - 1;
+          }
+        }
+
         double bDist = cgDists.at( before );
 
         // step個後の輪郭点までの距離
         int next = i + step;
-        if( next >= cgDists.size() ) next = ( i + step ) - cgDists.size();
+        if( next >= cgDists.size() ) {
+          next = ( i + step ) - cgDists.size();
+          if ( next < 0 ) {
+            next = 0;
+          }
+          else if ( next >= cgDists.size() ) {
+            next = cgDists.size() - 1;
+          }
+        }
+
         double nDist = cgDists.at( next );
 
         // 手領域矩形の長辺
