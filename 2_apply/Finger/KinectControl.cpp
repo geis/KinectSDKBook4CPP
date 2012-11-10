@@ -25,10 +25,20 @@ void KinectControl::initialize()
   ERROR_CHECK( kinect->NuiImageStreamOpen( NUI_IMAGE_TYPE_COLOR, CAMERA_RESOLUTION, 0, 2, 0, &imageStreamHandle ) );
 
   // 距離カメラを初期化する
+  // Nearモードにする
+  ERROR_CHECK( kinect->NuiImageStreamOpen( NUI_IMAGE_TYPE_DEPTH_AND_PLAYER_INDEX, CAMERA_RESOLUTION,
+    NUI_IMAGE_FRAME_FLAG_NEAR_MODE_ENABLED, 2, 0, &depthStreamHandle ) );
+  //ERROR_CHECK( kinect->NuiImageStreamOpen( NUI_IMAGE_TYPE_DEPTH_AND_PLAYER_INDEX, CAMERA_RESOLUTION, 0, 2, 0, &depthStreamHandle ) );
+
   ERROR_CHECK( kinect->NuiImageStreamOpen( NUI_IMAGE_TYPE_DEPTH_AND_PLAYER_INDEX, CAMERA_RESOLUTION, 0, 2, 0, &depthStreamHandle ) );
 
   // スケルトンを初期化する
-  ERROR_CHECK( kinect->NuiSkeletonTrackingEnable( 0, NUI_SKELETON_TRACKING_FLAG_SUPPRESS_NO_FRAME_DATA ) );
+  // Nearモードでのスケルトントラッキングおよび、Seatedモードにする
+  ERROR_CHECK( kinect->NuiSkeletonTrackingEnable( 0, 
+    NUI_SKELETON_TRACKING_FLAG_SUPPRESS_NO_FRAME_DATA |
+	NUI_SKELETON_TRACKING_FLAG_ENABLE_IN_NEAR_RANGE | 
+	NUI_SKELETON_TRACKING_FLAG_ENABLE_SEATED_SUPPORT ) );
+  //ERROR_CHECK( kinect->NuiSkeletonTrackingEnable( 0, NUI_SKELETON_TRACKING_FLAG_SUPPRESS_NO_FRAME_DATA ) );
 
   // フレーム更新イベントのハンドルを作成する
   streamEvent = ::CreateEvent( 0, TRUE, FALSE, 0 );
